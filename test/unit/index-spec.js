@@ -58,4 +58,22 @@ describe('injectLazyGetter', function() {
   });
 
 
+  // This spec is a bit redundant, but still good to check
+  it('only invokes the getter once', function() {
+    let calls = 0;
+    const x = {};
+    injectLazyGetter(x, PROP, function() {
+      ++calls;
+      return 5;
+    });
+
+    expect(calls).to.equal(0);
+
+    expect(x[PROP]).to.equal(5);
+    expect(calls).to.equal(1);
+
+    expect(x[PROP]).to.equal(5);
+    expect(calls).to.equal(1);
+  });
+
 });
