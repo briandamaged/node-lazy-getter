@@ -1,5 +1,7 @@
 # lazy-getter #
 
+[![npm version](https://badge.fury.io/js/lazy-getter.svg)](https://badge.fury.io/js/lazy-getter) [![GitHub version](https://badge.fury.io/gh/briandamaged%2Fnode-lazy-getter.svg)](https://badge.fury.io/gh/briandamaged%2Fnode-lazy-getter)
+
 Lazily evaluate properties and cache the results.
 
 ## Installation ##
@@ -66,6 +68,53 @@ const x = {
   },
 };
 
-console.log(x.expensive);
-console.log(x.expensive);
+console.log(x.expensive); // Super SLOW!
+console.log(x.expensive); // Super FAST!
 ```
+
+## ...Why? ##
+
+Lazy Getters might seem a bit esoteric, but they are definitely very handy in certain scenarios.  Here are a few examples:
+
+### Rarely-needed, but Computationally-Expensive Property ###
+
+For example:
+
+```javascript
+class HumongousNumber {
+
+  @lazyGetter
+  get primeFactorization() {
+    // Algorithm that returns an Array of prime factors
+    // for the number.  Might take years to run.
+  }
+}
+```
+
+
+
+### Infinite Object Graphs ###
+
+Sometimes, it's useful to model a problem as an infinite graph of Objects.  Obviously, you can't actually _contruct_ this infinite graph since it would require an unlimited about of time and memory.  Fortunately, you can "fake it" using lazy getters:
+
+```javascript
+
+function integerNode(i) {
+  return {
+    value: i,
+
+    @lazyGetter
+    get next() {
+      return integerNode(i + 1);
+    },
+  }
+}
+
+const x = integerNode(0);
+
+console.log(x.next.next.next.next.value); // Prints: 4
+```
+
+Now the object graph will be constructed as needed.
+
+FYI: [zelda-lists](https://www.npmjs.com/package/zelda-lists) leverages this technique to convert any iterable Object into a linked list. This allows infinite iterators to be converted into infinite object graphs, which makes it significantly easier to implement recursive algorithms.
